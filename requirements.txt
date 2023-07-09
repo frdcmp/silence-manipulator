@@ -1,3 +1,5 @@
 librosa
 streamlit
 pandas
+soundfile
+pydub
