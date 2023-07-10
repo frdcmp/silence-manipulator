@@ -321,8 +321,6 @@ def mix_audio_with_noise(audio_path, noise_path):
 
     return mixed_audio
 
-
-
 def process_audio_files(noise_folder_path):
     audio_files = os.listdir(noise_folder_path)
     noise_folder = "./noise"
@@ -363,14 +361,34 @@ def process_audio_files(noise_folder_path):
         # Save the mixed audio file in the processed folder with the original name
         processed_file_path = os.path.join(processed_folder, file_name)
         sf.write(processed_file_path, mixed_audio, audio_sr, 'PCM_24')
-
-        #st.write(f"Processed file: {file_name}")
-
+        st.write(f"Processed file: {file_name}")
 
 
+    # Get a list of all subdirectories within the folder
+    subdirectories = [f for f in os.listdir(noise_folder_path) if os.path.isdir(os.path.join(noise_folder_path, f))]
+    
+    # Delete each subdirectory within the folder
+    for subdirectory in subdirectories:
+        subdirectory_path = os.path.join(folder_path, subdirectory)
+        shutil.rmtree(subdirectory_path)
 
+def clean_temp_files(folder_path):
+    # Remove all files
+    file_names = os.listdir(folder_path)
+    for file_name in file_names:
+        file_path = os.path.join(folder_path, file_name)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+            print(f"Deleted file: {file_path}")
+
+    # Remove all subfolders
+    subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir()]
+    for subfolder in subfolders:
+        shutil.rmtree(subfolder)
+        print(f"Deleted folder: {subfolder}")
 
 def move_files(source_folder, destination_folder):
+                
     # Check if the source folder exists
     if not os.path.exists(source_folder):
         raise ValueError("Source folder does not exist!")
@@ -386,7 +404,5 @@ def move_files(source_folder, destination_folder):
         shutil.copy2(source_path, destination_path)
 
     print("Files saved successfully!")
-
-
 
 
