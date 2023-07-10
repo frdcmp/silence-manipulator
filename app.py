@@ -2,7 +2,8 @@ import streamlit as st
 import os
 import pandas as pd
 import base64
-import random
+import zipfile
+from io import BytesIO
 from pydub import AudioSegment
 from function import calculate_initial_silence_duration, calculate_end_silence_duration, trim_beginning, trim_end, pad_beginning, pad_end, mix_audio_with_noise, process_audio_files, move_files, clean_temp_files
 
@@ -21,7 +22,8 @@ def main():
     # Set Streamlit to wide mode
     st.set_page_config(layout="wide")
     
-    st.write("# Mazzafrusto")
+    st.write("# Silence Manipulator")
+    st.write("[GitHub Repository](https://github.com/frdcmp/silence-manipulator)")
 
     # Default folder path
     default_folder_path = "./"
@@ -30,13 +32,46 @@ def main():
     uploaded_files = st.file_uploader("Drop audio files here", accept_multiple_files=True)
 
     # Folder input
-    folder_name = st.text_input("Enter folder name", value="audio")
+    folder_name = st.text_input("Local audio folder path:", value="audio")
 
     # Combine default folder path with user-inputted folder name
     folder_path = os.path.join(default_folder_path, folder_name)
 
-    st.write("---")
+    if uploaded_files:
+        for file in uploaded_files:
+            file_path = os.path.join(folder_path, file.name)
+            with open(file_path, "wb") as f:
+                f.write(file.getbuffer())
 
+    # Create a column layout for the inputs
+    col1, col2 = st.columns(2)
+    with col1:    
+    # Delete all audio files in the folder
+        if st.button("Delete All Audio Files"):
+            files = os.listdir(folder_path)
+            for file in files:
+                file_path = os.path.join(folder_path, file)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+
+
+    with col2:
+        # Download all files in the folder as a zip
+        memory_file = None
+        if st.button("Download files as Zip"):
+            memory_file = BytesIO()
+            with zipfile.ZipFile(memory_file, "w") as zf:
+                for foldername, subfolders, filenames in os.walk(folder_path):
+                    for filename in filenames:
+                        file_path = os.path.join(foldername, filename)
+                        zf.write(file_path, arcname=os.path.relpath(file_path, folder_path))
+
+        if memory_file:
+            memory_file.seek(0)
+            st.download_button(label="Download", data=memory_file, file_name="audio.zip", mime="application/zip")
+
+    st.write("---")
+    st.write("Silence Manipulate")
     # Create a column layout for the inputs
     col1, col2 = st.columns(2)
 
