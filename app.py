@@ -206,25 +206,17 @@ def main():
         pre_roll /= 1000  # Convert milliseconds to seconds
 
 
-        # Create a checkbox container for selecting processing operations
-        #st.write("Select Processing Operations:")
-        #st.session_state.trim_beginning = st.checkbox("Trim Beginning", value=st.session_state.trim_beginning)
-        #st.session_state.trim_end = st.checkbox("Trim End", value=st.session_state.trim_end)
-        #st.session_state.pad_beginning = st.checkbox("Pad Beginning", value=st.session_state.pad_beginning)
-        #st.session_state.pad_end = st.checkbox("Pad End", value=st.session_state.pad_end)
         st.write("")
         st.write("Process the Files. Files are saved in the output folder")
         # Create a tab
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            # Trim the beginning of each file
+            # Trim Beginning and Move Trim Begin
             if st.button("Trim Beginning"):
-            
                 # Call clean_temp_files function
-
                 clean_temp_files('./output/trim_beginning')
-                
+
                 if st.session_state.results is not None:
                     for index, row in st.session_state.results.iterrows():
                         file_name = row["File Name"]
@@ -239,15 +231,27 @@ def main():
                             modified_file_path = trim_beginning(file_path, initial_silence_duration, pre_roll)
                         else:
                             # Skip the file
-                            #st.write(f"Skipping file: {file_name} - Initial silence duration is not greater than max_silent_length.")
                             continue
 
                         # Update the session state with the modified file path
                         st.session_state.results.at[index, "Modified File Path"] = modified_file_path
 
                         st.write("Beginning trimmed successfully.")
-                
+
                 st.write("Fatto tutto cazzo")
+
+                # Move Trim Begin
+                source_folder = "./output/trim_beginning"
+                destination_folder = os.path.join(default_folder_path, folder_path)
+                st.write("Input folder:", source_folder)  # Print the destination folder path in Streamlit
+                st.write("Destination folder:", destination_folder)  # Print the destination folder path in Streamlit
+
+                try:
+                    move_files(source_folder, destination_folder)
+                    st.success("Files moved successfully!")
+                except ValueError as e:
+                    st.error(str(e))
+
                 
         with col2:
             # Trim the end of each file
@@ -278,13 +282,26 @@ def main():
 
                         st.write("End trimmed successfully.")
                 st.write("Fatto tutto cazzo")
+
+                #Move Trim End        
+                source_folder = "./output/trim_end"
+                destination_folder = os.path.join(default_folder_path, folder_path)
+                st.write("Destination folder:", destination_folder)  # Print the destination folder path in Streamlit
+                st.write("Input folder:", source_folder)  # Print the destination folder path in Streamlit
+
+                try:
+                    move_files(source_folder, destination_folder)
+                    st.success("Files moved successfully!")
+                except ValueError as e:
+                    st.error(str(e))
                 
+
         with col3:
             # Pad the beginning of each file
             if st.button("Pad Beginning"):
             
                 # Call clean_temp_files function
-                st.write("Porcoddiooooooo")
+                st.write("Phone is the best 4ever and ever")
                 clean_temp_files('./output/pad_beginning')
                 
                 if st.session_state.results is not None:
@@ -309,13 +326,28 @@ def main():
 
                         st.write("Beginning padded successfully.")
                 st.write("Fatto tutto cazzo")
+
+                #Move Pad Begin        
+                source_folder = "./output/pad_beginning"
+                destination_folder = os.path.join(default_folder_path, folder_path)
+                st.write("Input folder:", source_folder)  # Print the destination folder path in Streamlit
+                st.write("Destination folder:", destination_folder)  # Print the destination folder path in Streamlit
+                try:
+                    move_files(source_folder, destination_folder)
+                    st.success("Files moved successfully!")
+                except ValueError as e:
+                    st.error(str(e))
+
+
+
+                
                 
         with col4:
             # Pad the end of each file
             if st.button("Pad End"):
             
                 # Call clean_temp_files function
-                st.write("Porcoddiooooooo")
+                st.write("viva la fica")
                 clean_temp_files('./output/pad_end')
 
                 if st.session_state.results is not None:
@@ -339,11 +371,25 @@ def main():
                         st.session_state.results.at[index, "Modified File Path"] = modified_file_path
 
                         st.write("End padded successfully.")
+
                 st.write("Fatto tutto cazzo")
+
+                #Move Pad End        
+                source_folder = "./output/pad_end"
+                destination_folder = os.path.join(default_folder_path, folder_path)
+                st.write("Input folder:", source_folder)  # Print the destination folder path in Streamlit
+                st.write("Destination folder:", destination_folder)  # Print the destination folder path in Streamlit
+                try:
+                    move_files(source_folder, destination_folder)
+                    st.success("Files moved successfully!")
+                except ValueError as e:
+                    st.error(str(e))
                 
        
         st.write("---")          
         st.write("")
+
+
         # Create the noise tab
         col1, col2 = st.columns(2)
         with col1:
@@ -351,19 +397,16 @@ def main():
  
 
 
-        with col2:    
-        
-
+        with col2:
             
             # Process Noise End
-            default_noise_folder_path = "./output"
+            #default_noise_folder_path = "./output"
 
             # Folder input
-            noise_folder_name = st.selectbox("Select folder name", ["pad_beginning", "pad_end", "trim_beginning", "trim_end"], index=1)
-
+            noise_folder_name = st.selectbox("Select folder name", ["./output/pad_beginning", "./output/pad_end", "./output/trim_beginning", "./output/trim_end", "audio"], index=1)
 
             # Combine default folder path with user-inputted folder name
-            noise_folder_path = os.path.join(default_noise_folder_path, noise_folder_name)
+            noise_folder_path = (noise_folder_name)
 
             if st.button("Process Noise"):
                     # Call clean_temp_files function
@@ -377,10 +420,24 @@ def main():
                             with open(file_path, "wb") as f:
                                 f.write(file.getbuffer())
 
-                    process_audio_files(noise_folder_path)              
+                    process_audio_files(noise_folder_path)    
+                    
+                    #Move Source audio       
+                    source_folder = "./output/added_noise"
+                    destination_folder = os.path.join(default_folder_path, folder_path)
+                    st.write("Input folder:", source_folder)  # Print the destination folder path in Streamlit
+                    st.write("Destination folder:", destination_folder)  # Print the destination folder path in Streamlit
+                    try:
+                        move_files(source_folder, destination_folder)
+                        st.success("Files moved successfully!")
+                    except ValueError as e:
+                        st.error(str(e))          
                     
 
         st.write("---")  
+        
+        
+
         st.write("")
         st.write("Saving and Overwriting the files. Files are saved in the audio folder, replacing the original. Save each time before processing for the next step to concatenate the results.")
         # Create the MOVING tab columns
@@ -446,6 +503,8 @@ def main():
                     st.success("Files moved successfully!")
                 except ValueError as e:
                     st.error(str(e))
+        
+
 
 
 
