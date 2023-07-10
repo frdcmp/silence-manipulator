@@ -23,7 +23,6 @@ def main():
     st.set_page_config(layout="wide")
     
     st.write("# Silence Manipulator")
-    st.write("[GitHub Repository](https://github.com/frdcmp/silence-manipulator)")
 
     # Default folder path
     default_folder_path = "./"
