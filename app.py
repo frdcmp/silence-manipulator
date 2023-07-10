@@ -345,13 +345,13 @@ def main():
         st.write("---")          
         st.write("")
         # Create the noise tab
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2 = st.columns(2)
         with col1:
             st.write("Add noise from the noise folder. Files are mixed randomly between the clips. Please make sure the noise files are always longer than the input files. Files are saved in the 'output/added_noise' folder")                 
  
 
 
-        with col4:    
+        with col2:    
         
 
             
@@ -359,7 +359,7 @@ def main():
             default_noise_folder_path = "./output"
 
             # Folder input
-            noise_folder_name = st.selectbox("Select folder name", ["pad_beginning", "pad_end"], index=1)
+            noise_folder_name = st.selectbox("Select folder name", ["pad_beginning", "pad_end", "trim_beginning", "trim_end"], index=1)
 
 
             # Combine default folder path with user-inputted folder name
