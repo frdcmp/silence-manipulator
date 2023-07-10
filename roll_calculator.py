@@ -4,7 +4,7 @@ import pandas as pd
 import base64
 import random
 from pydub import AudioSegment
-from function import calculate_initial_silence_duration, calculate_end_silence_duration, trim_beginning, trim_end, pad_beginning, pad_end, mix_audio_with_noise, process_audio_files, move_files
+from function import calculate_initial_silence_duration, calculate_end_silence_duration, trim_beginning, trim_end, pad_beginning, pad_end, mix_audio_with_noise, process_audio_files, move_files, clean_temp_files
 
 # Initialize session state variables
 if 'trim_beginning' not in st.session_state:
@@ -122,6 +122,40 @@ def main():
     if st.session_state.results is not None:
         st.write(st.session_state.results)
         st.write("")
+        
+        st.write("---")  
+        st.write("")
+        st.write("Summary block. It shows alll the FALSE and TRUE checks for Initial, End and Overall.")
+        # Summary block
+        num_initial_false = st.session_state.results["Initial Check"].value_counts().get(False, 0)
+        num_initial_true = st.session_state.results["Initial Check"].value_counts().get(True, 0)
+        num_end_false = st.session_state.results["End Check"].value_counts().get(False, 0)
+        num_end_true = st.session_state.results["End Check"].value_counts().get(True, 0)
+        num_check_false = st.session_state.results["Check"].value_counts().get(False, 0)
+        num_check_true = st.session_state.results["Check"].value_counts().get(True, 0)
+
+
+        # Creating a tab
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            tabs = ["Overall Checks", "Initial Checks", "End Checks"]
+            current_tab = st.radio("Checks", tabs)
+
+        with col2:
+            st.write("Results:")
+            if current_tab == "Initial Checks":
+                st.write(f"FALSE: {num_initial_false}")
+                st.write(f"TRUE: {num_initial_true}")
+            elif current_tab == "End Checks":
+                st.write(f"FALSE: {num_end_false}")
+                st.write(f"TRUE: {num_end_true}")
+            elif current_tab == "Overall Checks":
+                st.write(f"FALSE: {num_check_false}")
+                st.write(f"TRUE: {num_check_true}")
+
+        
+        
+        
         # Export results to a CSV file and provide a download link
         if st.button("Generate CSV link"):
             csv_file = st.session_state.results.to_csv(index=False)
@@ -151,6 +185,11 @@ def main():
         with col1:
             # Trim the beginning of each file
             if st.button("Trim Beginning"):
+            
+                # Call clean_temp_files function
+
+                clean_temp_files('./output/trim_beginning')
+                
                 if st.session_state.results is not None:
                     for index, row in st.session_state.results.iterrows():
                         file_name = row["File Name"]
@@ -160,21 +199,29 @@ def main():
                         file_path = os.path.join(folder_path, file_name)
 
                         # Check if the initial silence duration exceeds the pre roll
-                        if initial_silence_duration > pre_roll:
+                        if initial_silence_duration > max_silent_length:
                             # Trim the beginning of the file
                             modified_file_path = trim_beginning(file_path, initial_silence_duration, pre_roll)
                         else:
                             # Skip the file
-                            #st.write(f"Skipping file: {file_name} - Initial silence duration is not greater than pre roll.")
+                            #st.write(f"Skipping file: {file_name} - Initial silence duration is not greater than max_silent_length.")
                             continue
 
                         # Update the session state with the modified file path
                         st.session_state.results.at[index, "Modified File Path"] = modified_file_path
 
                         st.write("Beginning trimmed successfully.")
+                
+                st.write("Fatto tutto cazzo")
+                
         with col2:
             # Trim the end of each file
             if st.button("Trim End"):
+            
+                # Call clean_temp_files function
+                st.write("Porcoddiooooooo")
+                clean_temp_files('./output/trim_end')
+                
                 if st.session_state.results is not None:
                     for index, row in st.session_state.results.iterrows():
                         file_name = row["File Name"]
@@ -182,22 +229,29 @@ def main():
                         end_silence_duration = row["End Silence (s)"]
 
                         file_path = os.path.join(folder_path, file_name)
-                        # Check if the end silence duration exceeds the pre roll
-                        if end_silence_duration > pre_roll:
+                        # Check if the end silence duration exceeds the max_silent_length
+                        if end_silence_duration > max_silent_length:
                             # Trim the end of the file
                             modified_file_path = trim_end(file_path, end_silence_duration, pre_roll)
                         else:
                             # Skip the file
-                            #st.write(f"Skipping file: {file_name} - End silence duration is not greater than pre roll.")
+                            #st.write(f"Skipping file: {file_name} - End silence duration is not greater than max_silent_length.")
                             continue
 
                         # Update the session state with the modified file path
                         st.session_state.results.at[index, "Modified File Path"] = modified_file_path
 
                         st.write("End trimmed successfully.")
+                st.write("Fatto tutto cazzo")
+                
         with col3:
             # Pad the beginning of each file
             if st.button("Pad Beginning"):
+            
+                # Call clean_temp_files function
+                st.write("Porcoddiooooooo")
+                clean_temp_files('./output/pad_beginning')
+                
                 if st.session_state.results is not None:
                     for index, row in st.session_state.results.iterrows():
                         file_name = row["File Name"]
@@ -206,22 +260,29 @@ def main():
 
                         file_path = os.path.join(folder_path, file_name)
 
-                        # Check if the initial silence duration is less than the pre roll
-                        if initial_silence_duration < pre_roll:
+                        # Check if the initial silence duration is less than the min_silent_length
+                        if initial_silence_duration < min_silent_length:
                             # Pad the beginning of the file
                             modified_file_path = pad_beginning(file_path, initial_silence_duration, pre_roll)
                         else:
                             # Skip the file
-                            #st.write(f"Skipping file: {file_name} - Initial silence duration is not less than pre roll.")
+                            #st.write(f"Skipping file: {file_name} - Initial silence duration is not less than min_silent_length.")
                             continue
 
                         # Update the session state with the modified file path
                         st.session_state.results.at[index, "Modified File Path"] = modified_file_path
 
                         st.write("Beginning padded successfully.")
+                st.write("Fatto tutto cazzo")
+                
         with col4:
             # Pad the end of each file
             if st.button("Pad End"):
+            
+                # Call clean_temp_files function
+                st.write("Porcoddiooooooo")
+                clean_temp_files('./output/pad_end')
+
                 if st.session_state.results is not None:
                     for index, row in st.session_state.results.iterrows():
                         file_name = row["File Name"]
@@ -231,18 +292,20 @@ def main():
                         file_path = os.path.join(folder_path, file_name)
 
                         # Check if the end silence duration is less than the pre roll
-                        if end_silence_duration < pre_roll:
+                        if end_silence_duration < min_silent_length:
                             # Pad the end of the file
                             modified_file_path = pad_end(file_path, end_silence_duration, pre_roll)
                         else:
                             # Skip the file
-                            #st.write(f"Skipping file: {file_name} - End silence duration is not less than pre roll.")
+                            #st.write(f"Skipping file: {file_name} - End silence duration is not less than min_silent_length.")
                             continue
 
                         # Update the session state with the modified file path
                         st.session_state.results.at[index, "Modified File Path"] = modified_file_path
 
                         st.write("End padded successfully.")
+                st.write("Fatto tutto cazzo")
+                
        
         st.write("---")          
         st.write("")
@@ -251,39 +314,25 @@ def main():
         with col1:
             st.write("Add noise from the noise folder. Files are mixed randomly between the clips. Please make sure the noise files are always longer than the input files. Files are saved in the 'output/added_noise' folder")                 
  
-        with col3:    
-            # Process Noise Beginning
-            default_noise_folder_path = "./output"
 
-            # Folder input
-            noise_folder_name = st.text_input("Enter folder name", value="pad_beginning")
-
-            # Combine default folder path with user-inputted folder name
-            noise_folder_path = os.path.join(default_noise_folder_path, noise_folder_name)
-
-            if st.button("Process Noise Beginning"):
-                    # Check if audio files were dropped
-                    if uploaded_files:
-                        # Save uploaded files to the specified folder
-                        os.makedirs(noise_folder_path, exist_ok=True)
-                        for file in uploaded_files:
-                            file_path = os.path.join(noise_folder_path, file.name)
-                            with open(file_path, "wb") as f:
-                                f.write(file.getbuffer())
-
-                    process_audio_files(noise_folder_path)
 
         with col4:    
+        
+
+            
             # Process Noise End
             default_noise_folder_path = "./output"
 
             # Folder input
-            folder_name = st.text_input("Enter folder name", value="pad_end")
+            noise_folder_name = st.selectbox("Select folder name", ["pad_beginning", "pad_end"], index=1)
+
 
             # Combine default folder path with user-inputted folder name
-            noise_folder_path = os.path.join(default_noise_folder_path, folder_name)
+            noise_folder_path = os.path.join(default_noise_folder_path, noise_folder_name)
 
-            if st.button("Process Noise End"):
+            if st.button("Process Noise"):
+                    # Call clean_temp_files function
+                    clean_temp_files('./output/added_noise')
                     # Check if audio files were dropped
                     if uploaded_files:
                         # Save uploaded files to the specified folder
@@ -308,6 +357,7 @@ def main():
             if st.button("Save TB"):
                 source_folder = "./output/trim_beginning"
                 destination_folder = os.path.join(default_folder_path, folder_path)
+                st.write("Input folder:", source_folder)  # Print the destination folder path in Streamlit                
                 st.write("Destination folder:", destination_folder)  # Print the destination folder path in Streamlit
 
                 try:
@@ -325,6 +375,8 @@ def main():
                 source_folder = "./output/trim_end"
                 destination_folder = os.path.join(default_folder_path, folder_path)
                 st.write("Destination folder:", destination_folder)  # Print the destination folder path in Streamlit
+                st.write("Input folder:", source_folder)  # Print the destination folder path in Streamlit
+
                 try:
                     move_files(source_folder, destination_folder)
                     st.success("Files moved successfully!")
@@ -337,6 +389,7 @@ def main():
             if st.button("Save PB"):
                 source_folder = "./output/added_noise"
                 destination_folder = os.path.join(default_folder_path, folder_path)
+                st.write("Input folder:", source_folder)  # Print the destination folder path in Streamlit
                 st.write("Destination folder:", destination_folder)  # Print the destination folder path in Streamlit
                 try:
                     move_files(source_folder, destination_folder)
@@ -351,6 +404,7 @@ def main():
             if st.button("Save PE"):
                 source_folder = "./output/added_noise"
                 destination_folder = os.path.join(default_folder_path, folder_path)
+                st.write("Input folder:", source_folder)  # Print the destination folder path in Streamlit
                 st.write("Destination folder:", destination_folder)  # Print the destination folder path in Streamlit
                 try:
                     move_files(source_folder, destination_folder)
@@ -360,35 +414,6 @@ def main():
 
 
 
-        st.write("---")  
-        st.write("")
-        st.write("Summary block. It shows alll the FALSE and TRUE checks for Initial, End and Overall.")
-        # Summary block
-        num_initial_false = st.session_state.results["Initial Check"].value_counts().get(False, 0)
-        num_initial_true = st.session_state.results["Initial Check"].value_counts().get(True, 0)
-        num_end_false = st.session_state.results["End Check"].value_counts().get(False, 0)
-        num_end_true = st.session_state.results["End Check"].value_counts().get(True, 0)
-        num_check_false = st.session_state.results["Check"].value_counts().get(False, 0)
-        num_check_true = st.session_state.results["Check"].value_counts().get(True, 0)
-
-
-        # Creating a tab
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            tabs = ["Initial Checks", "End Checks", "Overall Checks"]
-            current_tab = st.radio("Checks", tabs)
-
-        with col2:
-            st.write("Results:")              
-            if current_tab == "Initial Checks":
-                st.write(f"FALSE: {num_initial_false}")
-                st.write(f"TRUE: {num_initial_true}")
-            elif current_tab == "End Checks":
-                st.write(f"FALSE: {num_end_false}")
-                st.write(f"TRUE: {num_end_true}")
-            elif current_tab == "Overall Checks":
-                st.write(f"FALSE: {num_check_false}")
-                st.write(f"TRUE: {num_check_true}")
 
 
 # Run the Streamlit app
