@@ -29,7 +29,7 @@ The program provides an intuitive command-line interface, facilitating easy inte
 ## How to Use
 
 1. Install the necessary dependencies by running `pip install -r requirements.txt`.
-2. Run the app with Streamlit by executing the command `streamlit run roll_calculator.py`.
+2. Run the app with Streamlit by executing the command `streamlit run app.py`.
 3. Use the Streamlit interface to interact with SilenceManipulator and specify the audio files or directories you want to process.
 4. Set the desired length of silence to be removed or added.
 5. Optionally, specify the characteristics of the noise floor to be mixed with the audio clips.
