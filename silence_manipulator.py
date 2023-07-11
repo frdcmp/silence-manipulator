@@ -215,29 +215,30 @@ def main():
             if st.button("Trim Beginning"):
                 # Call clean_temp_files function
                 clean_temp_files('./output/trim_beginning')
+                with st.spinner("Trimming in progress..."):
+                    if st.session_state.results is not None:
+                        for index, row in st.session_state.results.iterrows():
+                            file_name = row["File Name"]
+                            initial_silence_duration = row["Initial Silence (s)"]
+                            end_silence_duration = row["End Silence (s)"]
 
-                if st.session_state.results is not None:
-                    for index, row in st.session_state.results.iterrows():
-                        file_name = row["File Name"]
-                        initial_silence_duration = row["Initial Silence (s)"]
-                        end_silence_duration = row["End Silence (s)"]
+                            file_path = os.path.join(folder_path, file_name)
 
-                        file_path = os.path.join(folder_path, file_name)
+                            # Check if the initial silence duration exceeds the pre roll
+                            if initial_silence_duration > max_silent_length:
+                                # Trim the beginning of the file
+                                modified_file_path = trim_beginning(file_path, initial_silence_duration, pre_roll)
+                            else:
+                                # Skip the file
+                                continue
 
-                        # Check if the initial silence duration exceeds the pre roll
-                        if initial_silence_duration > max_silent_length:
-                            # Trim the beginning of the file
-                            modified_file_path = trim_beginning(file_path, initial_silence_duration, pre_roll)
-                        else:
-                            # Skip the file
-                            continue
+                            # Update the session state with the modified file path
+                            st.session_state.results.at[index, "Modified File Path"] = modified_file_path
 
-                        # Update the session state with the modified file path
-                        st.session_state.results.at[index, "Modified File Path"] = modified_file_path
+                            st.write("Beginning trimmed successfully.")
+                    
 
-                        st.write("Beginning trimmed successfully.")
-
-                st.write("Fatto tutto cazzo")
+                st.success("End trimmed successfully.")
 
                 # Move Trim Begin
                 source_folder = "./output/trim_beginning"
@@ -259,28 +260,29 @@ def main():
                 # Call clean_temp_files function
                 st.write("Porcoddiooooooo")
                 clean_temp_files('./output/trim_end')
-                
-                if st.session_state.results is not None:
-                    for index, row in st.session_state.results.iterrows():
-                        file_name = row["File Name"]
-                        initial_silence_duration = row["Initial Silence (s)"]
-                        end_silence_duration = row["End Silence (s)"]
+                with st.spinner("Trimming in progress..."):
+                    
+                    if st.session_state.results is not None:
+                        for index, row in st.session_state.results.iterrows():
+                            file_name = row["File Name"]
+                            initial_silence_duration = row["Initial Silence (s)"]
+                            end_silence_duration = row["End Silence (s)"]
 
-                        file_path = os.path.join(folder_path, file_name)
-                        # Check if the end silence duration exceeds the max_silent_length
-                        if end_silence_duration > max_silent_length:
-                            # Trim the end of the file
-                            modified_file_path = trim_end(file_path, end_silence_duration, pre_roll)
-                        else:
-                            # Skip the file
-                            #st.write(f"Skipping file: {file_name} - End silence duration is not greater than max_silent_length.")
-                            continue
+                            file_path = os.path.join(folder_path, file_name)
+                            # Check if the end silence duration exceeds the max_silent_length
+                            if end_silence_duration > max_silent_length:
+                                # Trim the end of the file
+                                modified_file_path = trim_end(file_path, end_silence_duration, pre_roll)
+                            else:
+                                # Skip the file
+                                #st.write(f"Skipping file: {file_name} - End silence duration is not greater than max_silent_length.")
+                                continue
 
-                        # Update the session state with the modified file path
-                        st.session_state.results.at[index, "Modified File Path"] = modified_file_path
+                            # Update the session state with the modified file path
+                            st.session_state.results.at[index, "Modified File Path"] = modified_file_path
 
-                        st.write("End trimmed successfully.")
-                st.write("Fatto tutto cazzo")
+                            st.write("End trimmed successfully.")
+                    st.write("Fatto tutto cazzo")
 
                 #Move Trim End        
                 source_folder = "./output/trim_end"
