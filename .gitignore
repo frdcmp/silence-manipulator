@@ -4,3 +4,4 @@
 *.mov
 *.xlsx
 *.srt
+__pycache__/
