@@ -21,7 +21,6 @@ def get_media_folders():
     media_folders = [f for f in os.listdir("./audio") if os.path.isdir(os.path.join("./audio", f))]
     return media_folders   # Add an empty string option
 
-
 def main():
     # Set Streamlit to wide mode
     st.set_page_config(layout="wide")
@@ -37,7 +36,7 @@ def main():
     # Folder input
     media_folders = get_media_folders()
     folder_name = st.selectbox("Select a folder from the audio directory:", media_folders)
-    
+
     # Combine default folder path with user-inputted folder name
     folder_path = os.path.join(default_folder_path, folder_name)
 
