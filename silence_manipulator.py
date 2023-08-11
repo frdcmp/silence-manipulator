@@ -28,14 +28,14 @@ def main():
     st.write("# Silence Manipulator")
 
     # Default folder path
-    default_folder_path = "./audio"
+    default_folder_path = "./"
 
     # File drop input
     uploaded_files = st.file_uploader("Drop audio files here", accept_multiple_files=True)
 
     # Folder input
-    media_folders = get_media_folders()
-    folder_name = st.selectbox("Select a folder from the audio directory:", media_folders)
+    #media_folders = get_media_folders()
+    folder_name = st.text_input("Select a folder from the audio directory:", value = "audio/")
 
     # Combine default folder path with user-inputted folder name
     folder_path = os.path.join(default_folder_path, folder_name)
